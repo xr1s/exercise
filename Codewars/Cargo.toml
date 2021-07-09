@@ -1,0 +1,30 @@
+cargo-features = ["edition2021"]
+
+bin = [
+  # 7 kyu
+  {"name" = "disemvowel_trolls", "path" = "7 kyu/Disemvowel Trolls/main.rs"},
+  # 6 kyu
+  {"name" = "counting_duplicates", "path" = "6 kyu/Counting Duplicates/main.rs"},
+  {"name" = "give_me_a_diamond", "path" = "6 kyu/Give me a Diamond/main.rs"},
+  {"name" = "make_the_deadfish_swim", "path" = "6 kyu/Make the Deadfish swim/main.rs"},
+  {"name" = "persistent_bugger", "path" = "6 kyu/Persistent Bugger./main.rs"},
+  {"name" = "positions_average", "path" = "6 kyu/Positions Average/main.rs"},
+  {"name" = "sort_the_odd", "path" = "6 kyu/Sort the odd/main.rs"},
+  {"name" = "street_fighter_2_character_selection", "path" = "6 kyu/Street Fighter 2 - Character Selection/main.rs"},
+  {"name" = "which_are_in", "path" = "6 kyu/Which are in?/main.rs"},
+  # 5 kyu
+  {"name" = "direction_reduction", "path" = "5 kyu/Direction Reduction/main.rs"},
+  {"name" = "molecule_to_atoms", "path" = "5 kyu/Molecule to atoms/main.rs"},
+  {"name" = "perimeter_of_squares_in_a_rectangle", "path" = "5 kyu/Perimeter of squares in a rectangle/main.rs"},
+]
+
+[package]
+name = "Codewars"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+itertools = "^0.10.1"
+derive_more = "^0.99.16"
+float_eq = "^0.6.0"
+thiserror = "^1.0.26"
