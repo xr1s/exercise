@@ -20,7 +20,7 @@ Describe(FindOdd){
     Assert::That(findOdd(V{1,1,1,1,1,1,10,1,1,1,1}), Equals(10));
   }
 };
-// clang-format off
+// clang-format on
 
 int main() {
   igloo::TestRunner::RunAllTests();
