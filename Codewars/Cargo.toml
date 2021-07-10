@@ -24,7 +24,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-itertools = "^0.10.1"
-derive_more = "^0.99.16"
+anyhow = "^1.0.42"
 float_eq = "^0.6.0"
+itertools = "^0.10.1"
 thiserror = "^1.0.26"

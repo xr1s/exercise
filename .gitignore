@@ -1,4 +1,18 @@
 /target
+/build
+
+# CMake
+CMakeLists.txt.user
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Testing
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps
 
 # Haskell.gitignore
 dist
@@ -24,3 +38,10 @@ cabal.project.local
 cabal.project.local~
 .HTF/
 .ghc.environment.*
+
+# Rust
+debug/
+target/
+Cargo.lock
+**/*.rs.bk
+*.pdb
