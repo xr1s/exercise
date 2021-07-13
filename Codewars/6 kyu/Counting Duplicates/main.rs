@@ -3,7 +3,7 @@ fn count_duplicates(text: &str) -> u32 {
     for char in text.chars() {
         counter
             .entry(char.to_ascii_lowercase())
-            .and_modify(|val| *val += 1)
+            .and_modify(|v| *v += 1)
             .or_insert(0);
     }
     counter.into_iter().filter(|&(_, val)| val != 0).count() as _

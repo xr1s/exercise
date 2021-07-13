@@ -1,12 +1,12 @@
 fn parse(code: &str) -> Vec<i32> {
     let mut array = Vec::new();
-    let mut current = 0;
+    let mut value = 0;
     for command in code.chars() {
         match command {
-            'i' => current += 1,
-            'd' => current -= 1,
-            's' => current *= current,
-            'o' => array.push(current),
+            'i' => value += 1,
+            'd' => value -= 1,
+            's' => value *= value,
+            'o' => array.push(value),
             _ => (),
         }
     }

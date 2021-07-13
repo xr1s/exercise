@@ -2,8 +2,7 @@ fn persistence(num: u64) -> u64 {
     let p = num
         .to_string()
         .bytes()
-        .map(|byte| byte - b'0')
-        .map(|byte| byte as u64)
+        .map(|byte| byte as u64 - b'0' as u64)
         .product();
     return if p == num { 0 } else { persistence(p) + 1 };
 }

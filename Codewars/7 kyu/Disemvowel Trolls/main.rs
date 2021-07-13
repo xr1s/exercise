@@ -1,5 +1,5 @@
 fn disemvowel(s: &str) -> String {
-    s.chars().filter(|&c| !"AEIOUaeiou".contains(c)).collect()
+    return s.chars().filter(|&c| !"AEIOUaeiou".contains(c)).collect();
 }
 
 fn main() {

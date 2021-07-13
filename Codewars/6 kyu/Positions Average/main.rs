@@ -1,12 +1,13 @@
 fn pos_average(s: &str) -> f64 {
     use itertools::{iproduct, zip};
     let vs = s.split(", ").collect::<Vec<_>>();
-    let same = iproduct!(0..vs.len(), 0..vs.len())
+    let (snum, slen) = (vs.len(), vs.first().unwrap().len());
+    let same = iproduct!(0..snum, 0..snum)
         .filter(|&(i, j)| i < j)
         .map(|(i, j)| (vs[i].chars(), vs[j].chars()))
         .map(|(s1, s2)| zip(s1, s2).filter(|&(c1, c2)| c1 == c2).count())
         .sum::<usize>() as f64;
-    let chars = vs.len() * (vs.len() - 1) * vs[0].len() / 2;
+    let chars = snum * (snum - 1) * slen / 2;
     return (same * 1e12 / chars as f64).round() / 1e10;
 }
 

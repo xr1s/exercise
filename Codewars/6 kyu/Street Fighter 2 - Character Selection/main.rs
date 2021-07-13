@@ -20,16 +20,16 @@ fn street_fighter_selection(
     return moves
         .iter()
         .fold(
-            vec![(position[0] as usize + 1, position[1] as usize + 1)],
+            vec![(position[0] as usize, position[1] as usize)],
             |mut v, next| {
                 v.push(match (next, v.last().unwrap()) {
-                    (Up, &(1, c)) => (1, c),
+                    (Up, &(0, c)) => (0, c),
                     (Up, &(r, c)) => (r - 1, c),
-                    (Down, &(2, c)) => (2, c),
+                    (Down, &(1, c)) => (1, c),
                     (Down, &(r, c)) => (r + 1, c),
-                    (Left, &(r, 1)) => (r, 6),
+                    (Left, &(r, 0)) => (r, 5),
                     (Left, &(r, c)) => (r, c - 1),
-                    (Right, &(r, 6)) => (r, 1),
+                    (Right, &(r, 5)) => (r, 0),
                     (Right, &(r, c)) => (r, c + 1),
                 });
                 return v;
@@ -37,7 +37,7 @@ fn street_fighter_selection(
         )
         .into_iter()
         .skip(1)
-        .map(|(r, c)| fighters[r - 1][c - 1].to_string())
+        .map(|(r, c)| fighters[r][c].to_string())
         .collect::<Vec<_>>();
 }
 

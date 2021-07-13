@@ -3,8 +3,7 @@ use itertools::Itertools;
 fn sort_array(arr: &[i32]) -> Vec<i32> {
     let mut odd = arr.iter().filter(|&n| n % 2 == 1).sorted();
     arr.iter()
-        .map(|n| if n % 2 == 1 { odd.next().unwrap() } else { n })
-        .cloned()
+        .map(|&n| if n % 2 == 1 { *odd.next().unwrap() } else { n })
         .collect()
 }
 

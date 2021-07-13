@@ -11,14 +11,13 @@ fn dir_reduc(arr: &[Direction]) -> Vec<Direction> {
         .into_iter()
         .fold(Vec::with_capacity(arr.len()), |mut v, &next| {
             match (v.last(), next) {
-                (Some(Direction::North), Direction::South) => v.pop(),
-                (Some(Direction::South), Direction::North) => v.pop(),
-                (Some(Direction::East), Direction::West) => v.pop(),
-                (Some(Direction::West), Direction::East) => v.pop(),
-                _ => {
-                    v.push(next);
-                    None
+                | (Some(Direction::North), Direction::South)
+                | (Some(Direction::South), Direction::North)
+                | (Some(Direction::East), Direction::West)
+                | (Some(Direction::West), Direction::East) => {
+                    v.pop();
                 }
+                _ => v.push(next),
             };
             return v;
         });

@@ -5,7 +5,8 @@ fn print(n: i32) -> Option<String> {
     let s = (0..n)
         .map(|row| {
             let spaces = i32::abs(n / 2 - row) as usize;
-            " ".repeat(spaces) + &"*".repeat(n as usize - spaces * 2) + "\n"
+            let stars = n as usize - spaces * 2;
+            " ".repeat(spaces) + &"*".repeat(stars) + "\n"
         })
         .collect::<Vec<_>>()
         .concat();

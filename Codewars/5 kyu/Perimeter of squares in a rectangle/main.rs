@@ -1,10 +1,10 @@
 fn perimeter(n: u64) -> u64 {
-    let fibonacci = itertools::iterate((3, 5), |&(p, n)| (n, p + n))
+    itertools::iterate((12, 20), |&(p, n)| (n, p + n))
         .take(n as _)
         .last()
         .unwrap()
-        .0;
-    return 4 * (fibonacci - 1);
+        .0
+        - 4
 }
 
 fn dotest(n: u64, exp: u64) -> () {
