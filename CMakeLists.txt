@@ -9,49 +9,61 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# 列出所有的产物 (用于增加全局依赖)
-function(get_all_targets _result _dir)
-  get_property(_subdirs DIRECTORY "${_dir}" PROPERTY SUBDIRECTORIES)
-  foreach(_subdir IN LISTS _subdirs)
-    get_all_targets(${_result} "${_subdir}")
-  endforeach()
-  get_directory_property(_sub_targets DIRECTORY "${_dir}" BUILDSYSTEM_TARGETS)
-  set(${_result} ${${_result}} ${_sub_targets} PARENT_SCOPE)
-endfunction()
-
 # 全局依赖
-include(ExternalProject)
-ExternalProject_Add(igloo
+include(FetchContent)
+
+# igloo 是 Codewars 的测试框架
+FetchContent_Declare(igloo
   GIT_REPOSITORY "https://github.com/codewars/igloo.git"
   GIT_TAG        "codewars"
-  TEST_COMMAND   ""
-  CMAKE_ARGS
-    "-DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}/third_party/igloo"
 )
-include_directories("${CMAKE_CURRENT_BINARY_DIR}/third_party/igloo/include")
-list(APPEND dependencies "igloo")
+FetchContent_GetProperties(igloo)
+if (NOT igloo_POPULATED)
+  FetchContent_Populate(igloo)
+endif()
+execute_process(
+  COMMAND
+    "${CMAKE_COMMAND}"
+    "-DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}/_deps/igloo-build"
+    "-Wno-dev"
+    "."
+  WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/_deps/igloo-src"
+)
+add_library(igloo INTERFACE IMPORTED)
+set_target_properties(igloo PROPERTIES
+  INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_BINARY_DIR}/_deps/igloo-build/include"
+)
+execute_process(
+  COMMAND
+    "${CMAKE_COMMAND}"
+    "--build"
+    "."
+    "--target"
+    "install"
+    "--parallel"
+  WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/_deps/igloo-src"
+)
 
-# Codewars 使用的是 C++17，range 此时还未入标准库
-# 能用 C++20 标准库 <ranges> 的地方就用 C++20
-ExternalProject_Add(range-v3
-  GIT_REPOSITORY  "https://github.com/ericniebler/range-v3"
-  INSTALL_DIR     "${CMAKE_CURRENT_BINARY_DIR}/third_party/range-v3"
-  CMAKE_ARGS
-    "-DRANGE_V3_TESTS=OFF"
-    "-DRANGE_V3_EXAMPLES=OFF"
-    "-DRANGE_V3_PERF=OFF"
-    "-DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}/third_party/range-v3"
+# range-v3
+FetchContent_Declare(range-v3
+  GIT_REPOSITORY  "https://github.com/ericniebler/range-v3.git"
+  GIT_TAG         "0.11.0"
 )
-include_directories("${CMAKE_CURRENT_BINARY_DIR}/third_party/range-v3/include")
-list(APPEND dependencies "range-v3")
+FetchContent_MakeAvailable(range-v3)
+
+# fmtlib
+FetchContent_Declare(fmtlib
+  GIT_REPOSITORY  "https://github.com/fmtlib/fmt.git"
+  GIT_TAG         "8.0.1"
+)
+FetchContent_MakeAvailable(fmtlib)
+
+# Boost
+FetchContent_Declare(boost.type_index
+  GIT_REPOSITORY "https://github.com/boostorg/type_index.git"
+  GIT_TAG        "boost-1.76.0"
+)
+FetchContent_MakeAvailable(boost.type_index)
 
 # 每个子项目列在这里
 add_subdirectory(Codewars)
-
-# 为所有产物增加全局依赖
-get_all_targets(targets "${CMAKE_CURRENT_SOURCE_DIR}")
-foreach(target ${targets})
-  if (NOT "${target}" IN_LIST dependencies)
-    add_dependencies(${target} ${dependencies})
-  endif()
-endforeach()
