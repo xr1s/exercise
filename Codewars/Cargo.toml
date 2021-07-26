@@ -19,7 +19,9 @@ bin = [
   { name = "molecule-to-atoms", path = "5 kyu/Molecule to atoms/main.rs"},
   { name = "perimeter-of-squares-in-a-rectangle", path = "5 kyu/Perimeter of squares in a rectangle/main.rs"},
   # 4 kyu
-  { name = "decode-the-morse-code-advanced", path = "4 kyu/Decode the Morse code, advanced/main.rs"}
+  { name = "decode-the-morse-code-advanced", path = "4 kyu/Decode the Morse code, advanced/main.rs"},
+  # 3 kyu
+  { name = "make-a-spiral", path = "3 kyu/Make a spiral/main.rs"},
 ]
 
 [package]
@@ -33,5 +35,7 @@ float_eq = "^0.6.0"
 lazy_static = "^1.4.0"
 itertools = "^0.10.1"
 num = "^0.4.0"
+num-derive = "^0.3.3"
+num-traits = "^0.2.14"
 regex = "^1.5.4"
 thiserror = "^1.0.26"
