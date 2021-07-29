@@ -1,0 +1,25 @@
+; 为罗马数字构建一个上下文无关文法。
+
+; 可惜我不熟罗马数字
+
+<lower-one> ::= "" | "I" | "II" | "III"
+<four>      ::= "IV"
+<upper-one> ::= "V" <lower-one>
+<nine>      ::= "IX"
+<ones>      ::= <lower-one> | <four> | <upper-one> | <nine>
+
+<lower-ten> ::= "" | "X" | "XX" | "XXX"
+<fourty>    ::= "XL"
+<upper-ten> ::= "L" <lower-ten>
+<ninety>    ::= "XC"
+<tens>      ::= <lower-ten> | <fourty> | <upper-ten> | <ninety>
+
+<lower-hundred> ::= "" | "C" | "CC" | "CCC"
+<four-hundred>  ::= "CD"
+<upper-hundred> ::= "D" <lower-hundred>
+<nine-hundred>  ::= "CM"
+<hundreds>      ::= <lower-hundred> | <four-hundred> | <upper-hundred> | <nine-hundred>
+
+<lower-thousand> ::= "" | "M" | "MM" | "MMM"
+
+<nums> ::= <lower-thousand> <hundreds> <tens> <ones>
