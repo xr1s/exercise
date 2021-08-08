@@ -1,0 +1,15 @@
+plugins {
+  id 'java'
+}
+
+sourceSets {
+  '2.4.1' { java { include 'Chapter 2: A Simple Syntax-Directed Translator/2.4 Parsing/1.java' } }
+}
+
+tasks.register('2.4.1', JavaExec) {
+  classpath = files(sourceSets['2.4.1'].output)
+  mainClass = 'Main'
+  standardInput = System.in
+}
+
+sourceSets.each { it.java.srcDirs('.') }
