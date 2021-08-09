@@ -3,13 +3,19 @@ plugins {
 }
 
 sourceSets {
-  '2.4.1' { java { include 'Chapter 2: A Simple Syntax-Directed Translator/2.4 Parsing/1.java' } }
+  '2.4.1' { java { srcDirs 'Chapter 2: A Simple Syntax-Directed Translator/2.4 Parsing/Exercise 2.4.1' } }
+  '2.6.1' { java { srcDirs 'Chapter 2: A Simple Syntax-Directed Translator/2.6 Lexical Analyzer/Exercise 2.6.1' } }
 }
 
-tasks.register('2.4.1', JavaExec) {
-  classpath = files(sourceSets['2.4.1'].output)
-  mainClass = 'Main'
-  standardInput = System.in
-}
-
-sourceSets.each { it.java.srcDirs('.') }
+sourceSets
+  .stream()
+  .filter {
+    !['main', 'test'].contains(it.name)
+  }
+  .each {
+    tasks.register(it.name, JavaExec) {
+      classpath = files(sourceSets[it.name].output)
+      mainClass = 'Main'
+      standardInput = System.in
+    }
+  }
