@@ -9,6 +9,7 @@ import lexer.Tag;
 import lexer.Word;
 import lexer.Token;
 import lexer.Num;
+import lexer.Rel;
 
 class Lexer {
   public int line = 1;
@@ -34,19 +35,35 @@ class Lexer {
     this.reader = new PushbackReader(reader);
   }
 
-  void skipBlockComment() throws IOException {
-    boolean meet = false;
-    do {
-      this.peek = this.reader.read();
-      if (this.peek == '*') meet = true;
-      else if (this.peek != '/') meet = false;
-    } while (this.peek != -1 && !(meet && this.peek == '/'));
+  // 可能会返回包括 <, <=, !, !=, =, ==, >, >= 八种 Token
+  Token scanRel() throws IOException {
+    int prev = this.peek;
     this.peek = this.reader.read();
-  }
-
-  void skipLineComment() throws IOException {
-    do this.peek = this.reader.read(); //
-    while (this.peek != '\n' && this.peek != -1);
+    int next = 0;
+    if (this.peek == '=') {
+      next = this.peek;
+      this.peek = this.reader.read();
+    }
+    switch (prev * 256 + next) {
+      case '<' * 256:
+        return Rel.LT;
+      case '<' * 256 + '=':
+        return Rel.LE;
+      case '=' * 256:
+        return new Token('=');
+      case '=' * 256 + '=':
+        return Rel.EQ;
+      case '!' * 256:
+        return new Token('!');
+      case '!' * 256 + '=':
+        return Rel.NE;
+      case '>' * 256:
+        return Rel.GT;
+      case '>' * 256 + '=':
+        return Rel.GE;
+    }
+    // unreacheable
+    return new Token(-1);
   }
 
   public Token scan() throws IOException {
@@ -55,20 +72,8 @@ class Lexer {
       else if (this.peek == '\n') ++line;
       else break;
     }
-    if (this.peek == '/') {
-      this.peek = this.reader.read();
-      if (this.peek == '*') {
-        this.skipBlockComment();
-        return this.scan(); // 尾递归
-      }
-      if (this.peek == '/') {
-        this.skipLineComment();
-        return this.scan(); // 尾递归
-      }
-      // 如果不是注释，继续往下走
-      // 将会返回一个 / 的 Token
-      this.reader.unread(this.peek);
-      this.peek = '/';
+    if ("<!=>".indexOf(this.peek) != -1) {
+      return this.scanRel();
     }
     if (Character.isDigit(this.peek)) {
       int v = 0;

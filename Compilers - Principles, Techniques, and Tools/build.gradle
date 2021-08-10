@@ -4,7 +4,8 @@ plugins {
 
 sourceSets {
   '2.4.1' { java { srcDirs 'Chapter 2: A Simple Syntax-Directed Translator/2.4 Parsing/Exercise 2.4.1' } }
-  '2.6.1' { java { srcDirs 'Chapter 2: A Simple Syntax-Directed Translator/2.6 Lexical Analyzer/Exercise 2.6.1' } }
+  '2.6.1' { java { srcDirs 'Chapter 2: A Simple Syntax-Directed Translator/2.6 Lexical Analyzer/Exercise 2.6.1', 'Chapter 2: A Simple Syntax-Directed Translator/2.6 Lexical Analyzer/lib' } }
+  '2.6.2' { java { srcDirs 'Chapter 2: A Simple Syntax-Directed Translator/2.6 Lexical Analyzer/Exercise 2.6.2', 'Chapter 2: A Simple Syntax-Directed Translator/2.6 Lexical Analyzer/lib' } }
 }
 
 sourceSets
