@@ -5,10 +5,10 @@ import java.io.PushbackReader;
 import java.io.Reader;
 import java.util.Hashtable;
 
+import lexer.Int;
 import lexer.Tag;
-import lexer.Word;
 import lexer.Token;
-import lexer.Num;
+import lexer.Word;
 
 class Lexer {
   public int line = 1;
@@ -76,7 +76,7 @@ class Lexer {
         v = 10 * v + Character.digit(this.peek, 10);
         this.peek = this.reader.read();
       } while (Character.isDigit(this.peek));
-      return new Num(v);
+      return new Int(v);
     }
     if (Character.isLetter(this.peek)) {
       StringBuilder b = new StringBuilder();

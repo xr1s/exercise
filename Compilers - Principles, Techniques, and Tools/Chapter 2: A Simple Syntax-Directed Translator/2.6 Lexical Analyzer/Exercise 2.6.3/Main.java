@@ -5,11 +5,11 @@ import java.io.PushbackReader;
 import java.io.Reader;
 import java.util.Hashtable;
 
-import lexer.Int;
-import lexer.Rel;
 import lexer.Tag;
-import lexer.Token;
 import lexer.Word;
+import lexer.Token;
+import lexer.Int;
+import lexer.Float;
 
 class Lexer {
   public int line = 1;
@@ -35,35 +35,17 @@ class Lexer {
     this.reader = new PushbackReader(reader);
   }
 
-  // 可能会返回包括 <, <=, !, !=, =, ==, >, >= 八种 Token
-  Token scanRel() throws IOException {
-    int prev = this.peek;
-    this.peek = this.reader.read();
-    int next = 0;
-    if (this.peek == '=') {
-      next = this.peek;
+  public Token scanNum() throws IOException {
+    boolean hasDot = false;
+    StringBuilder builder = new StringBuilder();
+    do {
+      hasDot |= this.peek == '.';
+      builder.append((char)this.peek);
       this.peek = this.reader.read();
-    }
-    switch (prev * 256 + next) {
-      case '<' * 256:
-        return Rel.LT;
-      case '<' * 256 + '=':
-        return Rel.LE;
-      case '=' * 256:
-        return new Token('=');
-      case '=' * 256 + '=':
-        return Rel.EQ;
-      case '!' * 256:
-        return new Token('!');
-      case '!' * 256 + '=':
-        return Rel.NE;
-      case '>' * 256:
-        return Rel.GT;
-      case '>' * 256 + '=':
-        return Rel.GE;
-    }
-    // unreacheable
-    return new Token(-1);
+      // 一个数字中不能出现两个小数点
+    } while (!hasDot && this.peek == '.' || Character.isDigit(this.peek));
+    if (!hasDot) return new Int(Integer.parseInt(builder.toString()));
+    else return new Float(Double.parseDouble(builder.toString()));
   }
 
   public Token scan() throws IOException {
@@ -72,16 +54,15 @@ class Lexer {
       else if (this.peek == '\n') ++line;
       else break;
     }
-    if ("<!=>".indexOf(this.peek) != -1) {
-      return this.scanRel();
-    }
     if (Character.isDigit(this.peek)) {
-      int v = 0;
-      do {
-        v = 10 * v + Character.digit(this.peek, 10);
-        this.peek = this.reader.read();
-      } while (Character.isDigit(this.peek));
-      return new Int(v);
+      return this.scanNum();
+    }
+    if (this.peek == '.') {
+      int num = this.reader.read();
+      this.reader.unread(num);
+      if (Character.isDigit(num)) {
+        return this.scanNum();
+      }
     }
     if (Character.isLetter(this.peek)) {
       StringBuilder b = new StringBuilder();

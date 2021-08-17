@@ -1,15 +1,15 @@
 package lexer;
 
-public class Num extends Token {
+public class Int extends Token {
   public final int value;
 
-  public Num(int v) {
-    super(Tag.NUM);
+  public Int(int v) {
+    super(Tag.INT);
     this.value = v;
   }
 
   @Override
   public String toString() {
-    return "<num " + value + ">";
+    return "<int " + value + ">";
   }
 }

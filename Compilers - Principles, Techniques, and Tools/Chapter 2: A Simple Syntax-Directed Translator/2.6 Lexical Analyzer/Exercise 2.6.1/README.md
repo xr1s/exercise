@@ -22,5 +22,5 @@ bar/*baz*qux/
 <word foo>
 <word bar>
 <token />
-<num 42>
+<int 42>
 ```
