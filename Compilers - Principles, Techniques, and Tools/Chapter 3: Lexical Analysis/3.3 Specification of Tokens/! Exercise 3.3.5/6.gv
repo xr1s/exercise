@@ -1,0 +1,49 @@
+digraph finite_state_machine {
+    subgraph cluster_origin {
+        label = "初始";
+        node [shape = doublecircle]; origin_a0b0 origin_a0b1;
+        node [shape = circle, nodesep=3];
+        {
+            rank = same;
+            origin_a0b0 [label = a0b0];
+            origin_a1b0 [label = a1b0];
+        }
+        {
+            rank = same;
+            origin_a0b1 [label = a0b1];
+            origin_a1b1 [label = a1b1];
+        }
+        origin_a0b0 -> origin_a1b0 -> origin_a0b0 [label = a];
+        origin_a0b0 -> origin_a0b1 -> origin_a0b0 [label = b];
+        origin_a1b1 -> origin_a0b1 -> origin_a1b1 [label = a];
+        origin_a1b1:ne -> origin_a1b0 [label = b];
+        origin_a1b0 -> origin_a1b1 [label = b];
+    }
+
+    subgraph cluster_first {
+        label = "消去 a1b0";
+        node [shape = doublecircle]; first_a0b0 first_a0b1;
+        node [shape = circle];
+        first_a0b0 [label = a0b0];
+        first_a0b1 [label = a0b1];
+        first_a1b1 [label = a1b1];
+        first_a0b0 -> first_a0b0 [label = aa];
+        first_a0b0 -> first_a0b1 -> first_a0b0 [label = b];
+        first_a1b1 -> first_a0b1 -> first_a1b1 [label = a];
+        first_a1b1 -> first_a1b1 [label = bb];
+        first_a0b0 -> first_a1b1 [label = ab];
+        first_a1b1 -> first_a0b0 [label = ba]; 
+    }
+
+    subgraph cluster_second {
+        label = "消去 a1b1";
+        node [shape = doublecircle]; second_a0b0 second_a0b1;
+        node [shape = circle];
+        second_a0b0 [label = a0b0];
+        second_a0b1 [label = a0b1];
+        second_a0b0 -> second_a0b0 [label = "a(bb)*a"];
+        second_a0b1 -> second_a0b1 [label = "a(bb)*a"];
+        second_a0b0 -> second_a0b1 [label = "b|a(bb)*ba"];
+        second_a0b1 -> second_a0b0;
+    }
+}
