@@ -4,4 +4,4 @@
 
 见图
 
-![状态机](main.png)
+![](main.svg)

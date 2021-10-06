@@ -1,0 +1,58 @@
+\documentclass[border = 1cm, preview, varwidth=\maxdimen]{standalone}
+
+\usepackage{xeCJK}
+
+% mathematics
+\usepackage{amsmath}
+
+% tikz
+\usepackage{tikz}
+\usepackage{ifthen}
+\usetikzlibrary{arrows}
+\usetikzlibrary{automata}
+\usetikzlibrary{positioning}
+\tikzset{
+  ->,
+  >=stealth',
+  node distance = 1.5cm,
+}
+
+\begin{document}
+\begin{tikzpicture}
+  % nodes
+  \node [state, initial] (s0) {$s_0$};
+  \foreach \curr in {1, ..., 9} {
+    \pgfmathtruncatemacro \prev { \curr - 1 };
+    \ifthenelse {\curr = 5}
+    {\node [state, below of = s\prev] (s\curr) {$s_{\curr}$};}
+    { \ifthenelse {\curr < 5}
+        {\node [state, right of = s\prev] (s\curr) {$s_{\curr}$};}
+        {\node [state, left of = s\prev] (s\curr) {$s_{\curr}$};}
+    }
+  }
+  \node [state, accepting, left of = s9] (s10) {$s_{10}$};
+
+  % paths
+  \foreach \char [count=\k] in {
+      辅音, \textbf a, 辅音, \textbf e, 辅音, \textbf i,
+      辅音, \textbf o, 辅音, \textbf u, 辅音} {
+    \pgfmathtruncatemacro \curr { \k - 1 };
+    \ifthenelse {\curr < 5}
+      {\draw (s\curr) edge [loop above] node {\char} (s\curr);}
+      {\draw (s\curr) edge [loop below] node {\char} (s\curr);}
+  }
+  \foreach \curr in {2, 4, ..., 10} {
+    \pgfmathtruncatemacro \prev { \curr - 1 };
+    \draw (s\prev) edge [above] node {辅音} (s\curr);
+  }
+  \draw (s0) edge [above] node {\textbf a} (s1);
+  \draw (s1) edge [below, bend right] node {\textbf e} (s3);
+  \draw (s2) edge [above] node {\textbf e} (s3);
+  \draw (s3) edge [above] node {\textbf i} (s5);
+  \draw (s4) edge [left] node {\textbf i} (s5);
+  \draw (s5) edge [above, bend right] node {\textbf o} (s7);
+  \draw (s6) edge [above] node {\textbf o} (s7);
+  \draw (s7) edge [above, bend right] node {\textbf u} (s9);
+  \draw (s8) edge [above] node {\textbf u} (s9);
+\end{tikzpicture}
+\end{document}

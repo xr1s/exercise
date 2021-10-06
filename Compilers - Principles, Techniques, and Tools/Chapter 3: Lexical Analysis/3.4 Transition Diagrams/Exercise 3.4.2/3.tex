@@ -1,0 +1,40 @@
+\documentclass[border = 1cm, preview, varwidth=\maxdimen]{standalone}
+
+\usepackage{xeCJK}
+
+% mathematics
+\usepackage{amsmath}
+
+% tikz
+\usepackage{tikz}
+\usepackage{ifthen}
+\usetikzlibrary{arrows}
+\usetikzlibrary{automata}
+\usetikzlibrary{positioning}
+\tikzset{
+  ->,
+  >=stealth',
+  node distance = 1.5cm,
+}
+
+\begin{document}
+\begin{tikzpicture}
+  % nodes
+  \node [state, initial] (s0) {$s_0$};
+  \node [state, right of = s0] (s1) {$s_1$};
+  \node [state, above = 2 of s1] (s2) {$s_2$};
+  \node [state, right = 2 of s1] (s3) {$s_3$};
+  \node [state, accepting, right of = s3] (s4) {$s_4$};
+  % paths
+  \draw (s0) edge [above] node {\textbf{/*}} (s1);
+  \draw (s1) edge [loop below] node {非*、"字符} (s2);
+  \draw (s1) edge [right, bend left] node {\textbf"} (s2);
+  \draw (s2) edge [loop above] node {非\;"字符} (s2);
+  \draw (s2) edge [left, bend left] node {\textbf"} (s1);
+  \draw (s1) edge [below, bend left] node {\textbf*} (s3);
+  \draw (s3) edge [loop above] node {\textbf*} (s3);
+  \draw (s3) edge [below, bend left] node {非*、"字符} (s1);
+  \draw (s3) edge [right] node {\textbf"} (s2);
+  \draw (s3) edge [above] node {\textbf/} (s4);
+\end{tikzpicture}
+\end{document}
