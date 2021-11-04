@@ -1,0 +1,75 @@
+\documentclass[border = 1cm, preview, varwidth = \maxdimen]{standalone}
+
+\usepackage{xeCJK}
+\usepackage{ifthen}
+
+% mathematics
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{derivative}
+\derivset{\pdif}[style-notation=multiple]
+\usepackage{esint}
+
+% tikz
+\usepackage{tikz}
+\usepackage{tikz-cd}
+\usetikzlibrary{arrows}
+\usetikzlibrary{automata}
+\usetikzlibrary{positioning}
+\usetikzlibrary{shapes}
+\tikzset{
+  ->, > = stealth', node distance = 1in,
+  failure/.style = {dashed},
+  state/.style = {ellipse, draw, minimum size = 1cm},
+}
+
+\begin{document}
+
+\begin{tikzpicture}
+  % nodes
+  \node [state, initial] (root) {};
+  \node [state, below of = root] (a) {a};
+  \node [state, left = 2 of a] (f) {f};
+  \node [state, right = 2 of a] (l) {l};
+  \node [state, below of = a] (al) {al};
+  \node [state, below of = f] (fa) {fa};
+  \node [state, below of = l] (ll) {ll};
+  \node [state, right = 2 of ll] (la) {la};
+  \node [state, accepting, below of = al] (all) {all};
+  \node [state, below of = fa] (fal) {fal};
+  \node [state, below of = la] (lam) {lam};
+  \node [state, below of = ll] (lla) {lla};
+  \node [state, accepting, below of = fal] (fall) {fall};
+  \node [state, accepting, below of = lam] (lame) {lame};
+  \node [state, below of = lla] (llam) {llam};
+  \node [state, accepting, below of = llam] (llama) {llama};
+  % edges
+  \draw (root) -- (a);
+  \draw (root) -- (f);
+  \draw (root) -- (l);
+  \draw (a) -- (al);
+  \draw (f) -- (fa);
+  \draw (l) -- (la);
+  \draw (l) -- (ll);
+  \draw (al) -- (all);
+  \draw (fa) -- (fal);
+  \draw (la) -- (lam);
+  \draw (ll) -- (lla);
+  \draw (fal) -- (fall);
+  \draw (lam) -- (lame);
+  \draw (lla) -- (llam);
+  \draw (llam) -- (llama);
+
+  \draw [failure] (al) to (l);
+  \draw [failure] (all) to (ll);
+  \draw [failure] (fa) to (a);
+  \draw [failure] (fal) to (al);
+  \draw [failure] (fall) to (all);
+  \draw [failure] (la) to (a);
+  \draw [failure, bend left] (ll) to (l);
+  \draw [failure] (lla) to (la);
+  \draw [failure] (llam) to (lam);
+  \draw [failure] (llama) to (a);
+\end{tikzpicture}
+
+\end{document}

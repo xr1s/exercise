@@ -1,0 +1,66 @@
+\documentclass[border = 1cm, preview, varwidth = \maxdimen]{standalone}
+
+\usepackage{xeCJK}
+\usepackage{ifthen}
+
+% mathematics
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{derivative}
+\derivset{\pdif}[style-notation=multiple]
+\usepackage{esint}
+
+% tikz
+\usepackage{tikz}
+\usepackage{tikz-cd}
+\usetikzlibrary{arrows}
+\usetikzlibrary{automata}
+\usetikzlibrary{positioning}
+\usetikzlibrary{shapes}
+\tikzset{
+  ->, > = stealth', node distance = 1in,
+  failure/.style = {dashed},
+  state/.style = {ellipse, draw, minimum size = 1cm},
+}
+
+\begin{document}
+
+\begin{tikzpicture}
+  % nodes
+  \node [state, initial] (root) {};
+  \node [state, below of = root] (a) {a};
+  \node [state, below left = 1 and 2 of a] (aa) {aa};
+  \node [state, accepting, below of = aa] (aaa) {aaa};
+  \node [state, below right = 1 and 2 of a] (ab) {ab};
+  \node [state, below of = ab] (aba) {aba};
+  \node [state, below left of = aba] (abaa) {abaa};
+  \node [state, accepting, below of = abaa] (abaaa) {abaaa};
+  \node [state, below right = 1 and 2 of aba] (abab) {abab};
+  \node [state, below of = abab] (ababa) {ababa};
+  \node [state, below of = ababa] (ababaa) {ababaa};
+  \node [state, accepting, below of = ababaa] (ababaaa) {ababaaa};
+  % edges
+  \draw (root) -- (a);
+  \draw (a) -- (aa);
+  \draw (aa) -- (aaa);
+  \draw (a) -- (ab);
+  \draw (ab) -- (aba);
+  \draw (aba) -- (abab);
+  \draw (aba) -- (abaa);
+  \draw (abaa) -- (abaaa);
+  \draw (abab) -- (ababa);
+  \draw (ababa) -- (ababaa);
+  \draw (ababaa) -- (ababaaa);
+
+  \draw [failure, bend right] (aa) to node {} (a);
+  \draw [failure, bend right = 22] (aaa) to node {} (aa);
+  \draw [failure] (aba) to node {} (a);
+  \draw [failure] (abaa) to node {} (aa);
+  \draw [failure] (abaaa) to node {} (aaa);
+  \draw [failure] (abab) to node {} (ab);
+  \draw [failure] (ababa) to node {} (aba);
+  \draw [failure] (ababaa) to node {} (abaa);
+  \draw [failure] (ababaaa) to node {} (abaaa);
+\end{tikzpicture}
+
+\end{document}
