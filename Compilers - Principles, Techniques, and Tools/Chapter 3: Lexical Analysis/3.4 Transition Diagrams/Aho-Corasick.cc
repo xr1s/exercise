@@ -1,165 +1,129 @@
-#include <deque>
-#include <map>
-#include <string>
 #include <string_view>
 #include <vector>
 
+// 为了方便起见，没有做更多的抽象；一些可以做的抽象包括
+// 一、
+//     使用模板参数确定 children 数组的长度，不要写死 26；
+//     此时 push 和 search 方法就应该传入一对解引用为整数的 InputIterator；
+//     就不需要由 aho_corasick 将每个字符映射为对应的 child，而是交给用户。
+//     这样可以将 aho_corasick 自动机拓展到 26 个小写字母之外。
+//     这一步将 aho_corasick 与 char 字符串相解耦。
+// 二、
+//     aho_corasick::node 不应该直接以指针暴露出来，应当实现一个包装类。
 class aho_corasick {
-  struct node {
+public:
+  class node {
+  private:
     // children 组织出了 Trie 树的结构；
     // failure 是 Aho-Corasick 自动机的失效指针。
     node *children[26], *failure;
-    // pattern 用于在 Trie 接受节点标记该节点对应的模式串；
-    // 当且仅当该节点在 Trie 上表示的串出现在模式串中，该值才非空。
-    std::string pattern;
-    // accepting 表示有多少字符串的接受状态在当前节点；
-    // 换句话说就是当前节点在 Trie 树上表示的串在模式串集合中出现了几次。
-    size_t accepting;
-    // times 表示当前使用的母串搜索时匹配到了多少次该状态；
-    // 该值会在每次搜索后清空，防止影响到下次搜索。
-    size_t times;
-    // indegree 表示有多少失效指针指向当前节点；
-    // 用于拓扑排序将每个节点的匹配次数沿失效链下推。
-    size_t indegree;
-
+    // match_count 是该节点在一次 search 中被实际匹配到的次数；
+    // 它需要在每次 search 前清空，否则会累加上次 search 的结果。
+    size_t match_count;
+    friend aho_corasick;
     node()
-        : accepting()
-        , children()
-        , indegree()
-        , times() {
+        : children() {
     }
 
-    ~node() {
-      for (auto child: this->children) delete child;
+  public:
+    // match_times 暴露出只读接口，用于输出某字符串被匹配到多少次；
+    size_t match_times() {
+      return this->match_count;
     }
-  } root;
-  // failure_was_built 标记自动机的失效指针是否已经构建
-  // 因为每次 trie 中插入新串自动机就要重构
+  };
+
+private:
+  aho_corasick::node root;
+  // failure_was_built 标记自动机的失效指针是否已经构建；
+  // 因为每次 trie 中插入新串自动机就要重构失效链。
   bool failure_was_built;
+  // queue 是对 Trie 进行广度优先搜索的结果；
+  // 下推 match_count 和析构整棵 Trie 用到了该结果。
+  // 关于下推 match_count 见 search 函数的最后两行。
+  std::vector<aho_corasick::node *> queue;
 
-  // build_failure 一次性构造自动机所有节点的失效指针
+  // 通过对 Trie 进行广度优先搜索，
+  // 一次性构造所有节点的失效指针；
+  // 同时储存该树的广搜序于 queue 中。
   void build_failure() {
     if (this->failure_was_built) return;
-    this->failure_was_built = true;
-    std::deque<aho_corasick::node *> queue;
-    this->root.failure = &this->root;
-    // 初始化第一层节点，使得第一层节点失效指针均指向根节点
-    // 注：若只初始化根节点，后续广搜会使得自动机上所有节点的失效指针都指向自己
-    for (auto child: this->root.children) {
-      if (child == nullptr) continue;
-      child->failure = &this->root;
-      queue.push_back(child);
-    }
-    // 执行广搜，对于每一个节点，对于其第 k 个孩子
-    // 沿着其失效链寻找同时存在 k 孩子的失效节点
-    while (!queue.empty()) {
-      auto n = queue.front();
-      queue.pop_front();
-      for (size_t k = 0; k != 26; k++) {
+    const auto root = &this->root;
+    root->failure = root;
+    std::vector<aho_corasick::node *> queue;
+    // 初始化第一层节点，使得第一层节点失效指针均指向根节点；
+    // 注：若只初始化根节点直接广搜，会使得自动机上所有节点的失效指针都指向自己
+    for (int k = 0; k != 26; ++k)
+      if (this->root.children[k] != nullptr) {
+        this->root.children[k]->failure = root;
+        queue.push_back(this->root.children[k]);
+      }
+    // 执行广搜，对于每一个节点，对于其第 k 个孩子，
+    // 沿着该节点的失效链寻找存在 k 孩子的失效节点。
+    for (size_t head = 0; head != queue.size(); ++head) {
+      auto n = queue[head];
+      for (size_t k = 0; k != 26; ++k) {
         if (n->children[k] == nullptr) continue;
+        // p 首先指向 n 的失效节点，后续会沿着 n 的失效链走到根，
+        // 或者在失效链上碰到也有一个 k 孩子的节点，
+        // 这意味着找到了新的相匹配前后缀，逻辑类似 KMP。
         auto p = n->failure;
-        // p 首先指向 n 的失效节点，后续会沿着失效链走到根
-        // 或者在失效链上找到也有一个 k 孩子的节点，
-        // 这意味着找到了新的相匹配前后缀，逻辑类似 KMP
-        while (p != &this->root && p->children[k] == nullptr) p = p->failure;
+        while (p != root && p->children[k] == nullptr) p = p->failure;
         if (p->children[k] != nullptr) p = p->children[k];
         n->children[k]->failure = p;
         queue.push_back(n->children[k]);
       }
     }
+    // failure_was_built 是 false 表明有新节点被插入，
+    // 说明 Trie 结构已经被改变了，广搜序也需要被替换。
+    this->queue = std::move(queue);
   }
 
-  void topological_sort_failure(std::map<std::string_view, size_t> &results) {
-    std::deque<aho_corasick::node *> queue;
-    std::deque<aho_corasick::node *> topological_sort_queue;
-    // 一、计算所有节点的失效节点入度
-    queue.push_back(&this->root);
-    ++this->root.indegree;
-    while (!queue.empty()) {
-      auto n = queue.front();
-      queue.pop_front();
-      for (auto child: n->children) {
-        if (child == nullptr) continue;
-        queue.push_back(child);
-        ++child->failure->indegree;
-      }
-    }
-    // 二、初始化拓扑排序的无入度节点
-    queue.push_back(&this->root);
-    while (!queue.empty()) {
-      auto n = queue.front();
-      queue.pop_front();
-      for (auto child: n->children) {
-        if (child == nullptr) continue;
-        queue.push_back(child);
-        if (n->indegree == 0) {
-          topological_sort_queue.push_back(n);
-        }
-      }
-    }
-    // 三、拓扑排序本体
-    while (!topological_sort_queue.empty()) {
-      auto n = topological_sort_queue.front();
-      topological_sort_queue.pop_front();
-      n->failure->times += n->times;
-      --n->failure->indegree;
-      if (n->failure->indegree == 0)
-        topological_sort_queue.push_back(n->failure);
-    }
-    // 四、返回所有接受状态的字符串出现次数
-    queue.push_back(&this->root);
-    while (!queue.empty()) {
-      auto n = queue.front();
-      queue.pop_front();
-      for (auto child: n->children) {
-        if (child == nullptr) continue;
-        queue.push_back(child);
-        if (child->accepting != 0 && child->times != 0)
-          results.emplace(child->pattern, child->accepting * child->times);
-      }
-    }
+  // 在下一次搜索前清理上次搜索的 match_count，
+  // 防止累加上次的结果。
+  void clear_match_count() {
+    for (auto n: this->queue) n->match_count = 0;
   }
 
 public:
-  aho_corasick() = default;
-  ~aho_corasick() = default;
+  ~aho_corasick() {
+    this->build_failure();
+    // 整理出所有节点后进行析构；
+    // 递归析构容易导致栈溢出。
+    for (auto n: this->queue) delete n;
+  }
 
-  // 构造 Trie 树
-  void push(std::string pattern) {
-    this->failure_was_built = false;
-    auto p = &this->root;
-    size_t index = 0;
-    for (size_t index = 0; index != pattern.size(); ++index) {
-      // assert(is_lower(param[index]));
-      size_t k = pattern[index] - 'a';
-      if (p->children[k] == nullptr) {
-        p->children[k] = new aho_corasick::node();
+  // push 单个字符串以构造 Trie 树。
+  // 返回值是接受节点的指针，用于用户储存并最终计算模式串的匹配次数。
+  aho_corasick::node *push(const std::string_view pattern) {
+    auto n = &this->root;
+    for (auto c: pattern) {
+      size_t k = c - 'a';
+      if (n->children[k] == nullptr) {
+        n->children[k] = new aho_corasick::node();
+        this->failure_was_built = false;
       }
-      p = p->children[k];
+      n = n->children[k];
     }
-    ++p->accepting;
-    p->pattern = std::move(pattern);
+    return n;
   }
 
   // search 方法从母串中搜索自动机中的所有模式串，
-  // 返回的 results 表示每个模式串匹配到了多少次。
-  // 未命中的模式串不会出现在返回的 map 中。
-  std::map<std::string_view, size_t> search(const std::string_view text) {
+  void search(const std::string_view text) {
     this->build_failure();
-    aho_corasick::node *p = &this->root;
-    for (char c: text) {
-      // assert(islower(c));
+    this->clear_match_count();
+    const auto root = &this->root;
+    auto n = root;
+    for (auto c: text) {
       size_t k = c - 'a';
-      // 若失配则沿着失配链走到根
-      while (p != &this->root && p->children[k] == nullptr) p = p->failure;
-      if (p->children[k] != nullptr) p = p->children[k];
+      while (n != root && n->children[k] == nullptr) n = n->failure;
+      if (n->children[k] != nullptr) n = n->children[k];
       // 当前节点匹配到了母串，则将匹配次数增加一次；
       // 当某节点匹配到了的时候，其失效链上所有节点均会匹配，均应更新；
       // 但这里采用惰性更新的方法，在整个母串匹配完后一次性下推标记即可；
-      p->times = p->times + 1;
+      n->match_count = n->match_count + 1;
     }
-    std::map<std::string_view, size_t> results;
-    this->topological_sort_failure(results);
-    return results;
+    // 根据广搜序，从叶子节点往根走，一次性下推（沿树上推，沿失效链下推）所有标记；
+    for (size_t k = this->queue.size() - 1; ~k; --k)
+      this->queue[k]->failure->match_count += this->queue[k]->match_count;
   }
 };
