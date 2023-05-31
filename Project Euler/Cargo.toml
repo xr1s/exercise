@@ -30,6 +30,9 @@ bin = [
   {"name" = "29", "path" = "29/main.rs"},
   {"name" = "30", "path" = "30/main.rs"},
   {"name" = "31", "path" = "31/main.rs"},
+  {"name" = "32", "path" = "32/main.rs"},
+  {"name" = "33", "path" = "33/main.rs"},
+  {"name" = "34", "path" = "34/main.rs"},
 ]
 
 [package]
