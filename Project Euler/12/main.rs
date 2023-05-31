@@ -1,5 +1,5 @@
 fn divisors_count(number: i64) -> i64 {
-    algorithm::number_theory::factorize(number)
+    algorithm::number_theory::factorize(&number)
         .iter()
         .map(|&(_, p)| p as i64 + 1)
         .product()

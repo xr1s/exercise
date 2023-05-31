@@ -2,26 +2,63 @@ pub mod sieve;
 
 use std::ops::{AddAssign, MulAssign};
 
-use num::{One, Zero};
+pub fn digits<N>(n: &N) -> Vec<i32>
+where
+    N: Clone,
+    N: std::ops::DivAssign<i32>,
+    N: num::Zero + num::ToPrimitive,
+    for<'a> &'a N: std::ops::Rem<i32, Output = N>,
+{
+    let mut ds = Vec::new();
+    let mut n = n.clone();
+    while !n.is_zero() {
+        let d = &n % 10;
+        ds.push(d.to_i32().unwrap());
+        n /= 10;
+    }
+    ds
+}
 
-pub fn factorize(mut number: i64) -> Vec<(i64, i32)> {
-    let mut k = 2;
+pub fn factorize<N>(n: &N) -> Vec<(N, i32)>
+where
+    N: Clone,
+    N: std::ops::ShrAssign<i32>,
+    for<'a> N: std::ops::AddAssign<&'a N>,
+    for<'a> N: std::ops::DivAssign<&'a N>,
+    for<'a> &'a N: std::ops::Mul<&'a N, Output = N>,
+    N: num::FromPrimitive + num::Integer,
+{
+    if n.is_zero() || n.is_one() {
+        return Vec::new();
+    }
+    let mut n = n.clone();
+    let two = N::from_i32(2).unwrap();
     let mut facts = Vec::new();
-    while k * k <= number {
-        let mut power = 0;
-        while number % k == 0 {
-            number /= k;
-            power += 1;
+    // 单独计算 2 的幂次
+    {
+        let mut p = 0;
+        while n.is_even() {
+            n.shr_assign(1);
+            p += 1;
         }
-        if power != 0 {
-            facts.push((k, power));
+        facts.push((two.clone(), p));
+    }
+    let mut k = N::from_i32(3).unwrap();
+    while &k * &k <= n {
+        let mut p = 0;
+        while n.is_multiple_of(&k) {
+            n /= &k;
+            p += 1;
         }
-        k += 1;
+        if p != 0 {
+            facts.push((k.clone(), p));
+        }
+        k += &two;
     }
-    if number > 1 {
-        facts.push((number, 1));
+    if !n.is_one() {
+        facts.push((n, 1));
     }
-    return facts;
+    facts
 }
 
 pub fn divisors(number: i64) -> Vec<i64> {
@@ -49,33 +86,35 @@ pub fn divisors(number: i64) -> Vec<i64> {
         if index != 0 {
             mem.entry(index).or_insert(result.clone());
         }
-        return result;
+        result
     }
-    let prime_factors = factorize(number);
+    let prime_factors = factorize(&number);
     let mut mem = HashMap::with_capacity(prime_factors.len());
     let mut result = recursive(&mut mem, &prime_factors, 0);
     result.sort();
-    return result;
+    result
 }
 
 /// 求阶乘, 可以传 BigInt
-pub fn factorial<T>(n: &T) -> T
+pub fn factorial<N>(n: &N) -> N
 where
-    T: PartialEq + AddAssign + Zero + One,
-    for<'a> T: MulAssign<&'a T>,
+    N: Clone + PartialEq + num::Zero + num::One,
+    for<'a> N: AddAssign<&'a N>,
+    for<'a> N: MulAssign<&'a N>,
 {
-    let mut r = T::one();
-    let mut k = T::zero();
+    let one = N::one();
+    let mut r = one.clone();
+    let mut k = N::zero();
     while &k != n {
-        k += T::one();
+        k += &one;
         r *= &k;
     }
-    return r;
+    r
 }
 
 pub fn combination(m: i64, n: i64) -> u128 {
     let (m, n) = (m as u128, n as u128);
-    (1u128..=n as u128).fold(1, |acc, k| acc * (m - n + k) / k)
+    (1u128..=n).fold(1, |acc, k| acc * (m - n + k) / k)
 }
 
 pub fn modpow(mut base: i64, mut exponent: i64, modulo: i64) -> i64 {
@@ -91,5 +130,5 @@ pub fn modpow(mut base: i64, mut exponent: i64, modulo: i64) -> i64 {
         base = base * base % modulo;
         exponent /= 2;
     }
-    return result;
+    result
 }

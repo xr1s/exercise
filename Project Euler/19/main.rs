@@ -13,11 +13,11 @@ where
         }
         since += Duration::days(1);
     }
-    return answer;
+    answer
 }
 
 fn main() {
-    let since = NaiveDate::from_ymd(1901, 1, 1);
-    let until = NaiveDate::from_ymd(2001, 1, 1);
+    let since = NaiveDate::from_ymd_opt(1901, 1, 1).unwrap();
+    let until = NaiveDate::from_ymd_opt(2001, 1, 1).unwrap();
     println!("{}", solve(since, until));
 }
