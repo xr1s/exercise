@@ -6,33 +6,38 @@ use num::{FromPrimitive, ToPrimitive};
 fn size_hint(n: usize) -> usize {
     let logarithm = (n as f64).ln().max(1.);
     let size_hint = n as f64 / logarithm * 1.25;
-    return size_hint as _;
+    size_hint as _
 }
 
 /// 欧拉筛法求素数
-pub fn primes<Int>(n: usize) -> Vec<Int>
+pub fn primes<Container>(n: usize) -> Container
 where
-    Int: PartialOrd + FromPrimitive + ToPrimitive,
-    for<'a> Int: Mul<&'a Int, Output = Int>,
-    for<'a> Int: Rem<&'a Int, Output = Int>,
+    Container::Item: Clone + PartialOrd + FromPrimitive + ToPrimitive + num::Zero,
+    for<'a> &'a Container::Item: Mul<&'a Container::Item, Output = Container::Item>,
+    for<'a> &'a Container::Item: Rem<&'a Container::Item, Output = Container::Item>,
+    Container: IntoIterator + FromIterator<Container::Item>,
 {
-    let mut primes = Vec::<Int>::with_capacity(size_hint(n));
-    let mut composites = BitVec::from_elem(n as usize, false);
+    let ni = Container::Item::from_usize(n).unwrap();
+
+    let mut primes = Vec::<Container::Item>::with_capacity(size_hint(n));
+    let mut composites = BitVec::from_elem(n, false);
     for k in 2..n {
+        let ki = Container::Item::from_usize(k).unwrap();
         if !composites[k] {
-            primes.push(Int::from_usize(k).unwrap());
+            primes.push(ki.clone());
         }
         for p in &primes {
-            if Int::from_usize(k).unwrap() * p >= Int::from_usize(n).unwrap() {
+            if &ki * p >= ni {
                 break;
             }
             composites.set(k * p.to_usize().unwrap(), true);
-            if Int::from_usize(k).unwrap() % p == Int::from_usize(0).unwrap() {
+            let rem = &ki % p;
+            if <Container::Item as num::Zero>::is_zero(&rem) {
                 break;
             }
         }
     }
-    return primes;
+    Container::from_iter(primes)
 }
 
 /// 除数函数
@@ -45,7 +50,7 @@ where
     for<'a> Int: Mul<&'a Int, Output = Int>,
     for<'a> Int: Div<&'a Int, Output = Int>,
 {
-    let _1 = Int::from_usize(1).unwrap();
+    let one = Int::from_usize(1).unwrap();
     let mut primes = Vec::with_capacity(size_hint(n));
     let mut composites = BitVec::from_elem(n, false);
     let mut tau = vec![Int::from_usize(0).unwrap(); n];
@@ -67,7 +72,7 @@ where
             }
             composites.set(c, true);
             if k % p == 0 {
-                aux[c] = aux[k].clone() + &_1;
+                aux[c] = aux[k].clone() + &one;
                 tau[c] = tau[k].clone() / &aux[k] * &aux[c];
                 break;
             }
@@ -75,7 +80,7 @@ where
             tau[c] = tau[p].clone() * &tau[k];
         }
     }
-    return tau;
+    tau
 }
 
 /// 除数函数
@@ -88,7 +93,7 @@ where
     for<'a> Int: Mul<&'a Int, Output = Int>,
     for<'a> Int: Div<&'a Int, Output = Int>,
 {
-    let _1 = Int::from_usize(1).unwrap();
+    let one = Int::from_usize(1).unwrap();
     let mut primes = Vec::with_capacity(size_hint(n));
     let mut composites = BitVec::from_elem(n, false);
     let mut sigma = vec![Int::from_usize(0).unwrap(); n];
@@ -100,8 +105,8 @@ where
     for k in 2..n {
         if !composites[k] {
             primes.push(k);
-            auxil[k] = Int::from_usize(k).unwrap() + &_1;
-            sigma[k] = Int::from_usize(k).unwrap() + &_1;
+            auxil[k] = Int::from_usize(k).unwrap() + &one;
+            sigma[k] = Int::from_usize(k).unwrap() + &one;
         }
         for &p in &primes {
             let c = k * p;
@@ -110,15 +115,15 @@ where
             }
             composites.set(c, true);
             if k % p == 0 {
-                auxil[c] = Int::from_usize(p).unwrap() * &auxil[k] + &_1;
+                auxil[c] = Int::from_usize(p).unwrap() * &auxil[k] + &one;
                 sigma[c] = sigma[k].clone() / &auxil[k] * &auxil[c];
                 break;
             }
-            auxil[c] = Int::from_usize(p).unwrap() + &_1;
+            auxil[c] = Int::from_usize(p).unwrap() + &one;
             sigma[c] = sigma[p].clone() * &sigma[k];
         }
     }
-    return sigma;
+    sigma
 }
 
 /// 欧拉函数
@@ -131,7 +136,7 @@ where
     for<'a> Int: Mul<&'a Int, Output = Int>,
     for<'a> Int: Div<&'a Int, Output = Int>,
 {
-    let _1 = Int::from_usize(1).unwrap();
+    let one = Int::from_usize(1).unwrap();
     let mut primes = Vec::with_capacity(size_hint(n));
     let mut composites = BitVec::from_elem(n, false);
     let mut phi = vec![Int::from_usize(0).unwrap(); n];
@@ -141,7 +146,7 @@ where
     for k in 2..n {
         if !composites[k] {
             primes.push(k);
-            phi[k] = Int::from_usize(k).unwrap() - &_1;
+            phi[k] = Int::from_usize(k).unwrap() - &one;
         }
         for &p in &primes {
             let c = p * k;
@@ -156,5 +161,5 @@ where
             phi[c] = phi[p].clone() * &phi[k];
         }
     }
-    return phi;
+    phi
 }

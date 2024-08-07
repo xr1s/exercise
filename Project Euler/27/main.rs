@@ -4,8 +4,7 @@
 // 因此 n=0 和 n=1 也至少应当为素数, 代入原式有 b 和 1+a+b 为素数
 // 于是枚举素数直接可求得 (a, b), 判断一下 a 和 b 的范围, 算出该解的连续长度, 找到最长的即可
 pub fn solve(m: i64, n: i64) -> i64 {
-    let primes = algorithm::number_theory::sieve::primes::<i64>(10000);
-    let prime_set: std::collections::HashSet<_> = primes.iter().collect();
+    let primes: Vec<i64> = algorithm::number_theory::sieve::primes(10000);
     let mut max_consecutive = (0, 0, 0);
     for &b in &primes {
         if b.abs() > n {
@@ -18,7 +17,7 @@ pub fn solve(m: i64, n: i64) -> i64 {
             }
             let consecutive = (1..)
                 .map(|n| n * n + n * a + b)
-                .take_while(|p| prime_set.contains(p))
+                .take_while(|p| primes.contains(p))
                 .collect::<Vec<_>>()
                 .len();
             if consecutive > max_consecutive.2 {
@@ -26,7 +25,7 @@ pub fn solve(m: i64, n: i64) -> i64 {
             }
         }
     }
-    return max_consecutive.0 * max_consecutive.1;
+    max_consecutive.0 * max_consecutive.1
 }
 
 fn main() {

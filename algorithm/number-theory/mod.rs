@@ -19,6 +19,22 @@ where
     ds
 }
 
+pub fn from_digits<N>(ds: &[N]) -> N
+where
+    N: Clone + num::One + num::Zero + num::ToPrimitive + num::FromPrimitive,
+    N: std::ops::AddAssign<N>,
+    N: std::ops::MulAssign<N>,
+    for<'a> &'a N: std::ops::Mul<&'a N, Output = N>,
+{
+    let mut p10 = N::one();
+    let mut n = N::zero();
+    for d in ds.iter().rev() {
+        n += &p10 * d;
+        p10 *= N::from_i32(10).unwrap();
+    }
+    n
+}
+
 pub fn factorize<N>(n: &N) -> Vec<(N, i32)>
 where
     N: Clone,
